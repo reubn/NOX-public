@@ -1,0 +1,3 @@
+#!/bin/bash
+
+[ "$IFACE" = "eth0" ] && sudo systemctl start NOX-mac-filter

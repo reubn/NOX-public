@@ -1,0 +1,14 @@
+[Unit]
+Description=NOX MAC Address Filter Service
+Wants=network-online.target
+After=network-online.target
+StartLimitBurst=10
+StartLimitIntervalSec=200s
+
+[Service]
+ExecStart=/bin/bash /etc/NOX/NOX-mac-filter.sh
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,63 @@
+# Setup
+Flash Raspbian Lite Buster
+Add `ssh` file to `boot` partition
+Eject and insert SD card
+Plug in ethernet cable to USB-Ethernet adapter port (eth1)
+Plug in USB-C power cable
+
+Find pi ip address of eth1 interface
+Login with `pi` and `raspberry`
+`sudo apt update`
+`sudo apt upgrade`
+`sudo raspi-config`
+Change `pi` password
+Change hostname to `NOX`
+Set WiFi country
+
+Plug in ethernet cable to onboard port (eth0)
+
+`sudo reboot`
+`ssh-copy-id pi@${eth1 IP addr}` on dev machine
+
+`sudo apt install hostapd bridge-utils ebtables netfilter-persistent networkd-dispatcher`
+`sudo systemctl stop hostapd`
+
+`./hostapd.conf` -> `/etc/hostapd/hostapd.conf`
+`#DAEMON_CONF=""` -> `DAEMON_CONF="/etc/hostapd/hostapd.conf"` replace in `/etc/default/hostapd`
+
+`./bridge-br0.netdev` -> `/etc/systemd/network/bridge-br0.netdev`
+`./bridge-br0-slave.network` -> `/etc/systemd/network/bridge-br0-slave.network`
+`./bridge-br0.network` -> `/etc/systemd/network/bridge-br0.network`
+
+`./35-ebtables` -> `/usr/share/netfilter-persistent/plugins.d/35-ebtables`
+`sudo chmod +x /usr/share/netfilter-persistent/plugins.d/35-ebtables`
+`sudo mkdir /etc/ebtables/`
+
+`sudo mkdir /etc/networkd-dispatcher/configured.d/`
+`./01-NOX-mac-filter` -> `/etc/networkd-dispatcher/configured.d/01-NOX-mac-filter`
+`sudo chmod +x /etc/networkd-dispatcher/configured.d/01-NOX-mac-filter`
+
+`echo 'denyinterfaces wlan0' | sudo tee -a /etc/dhcpcd.conf`
+`echo 'denyinterfaces eth0' | sudo tee -a /etc/dhcpcd.conf`
+`echo 'denyinterfaces eth1' | sudo tee -a /etc/dhcpcd.conf`
+
+`sudo brctl addbr br0`
+
+`sudo systemctl enable systemd-networkd`
+`sudo systemctl enable networkd-dispatcher`
+
+`sudo systemctl unmask hostapd`
+`sudo systemctl enable hostapd`
+
+`./NOX-mac-filter.service` -> `/etc/systemd/system/NOX-mac-filter.service`
+`./NOX/` -> `/etc/NOX/`
+`sudo chmod +x /etc/NOX/NOX-mac-filter.sh`
+`sudo chmod +x /etc/NOX/NOX-firewall-setup.sh`
+
+`sudo /etc/NOX/NOX-firewall-setup.sh`
+
+`sudo systemctl daemon-reload`
+
+`sudo systemctl enable NOX-mac-filter`
+
+`sudo systemctl reboot`
